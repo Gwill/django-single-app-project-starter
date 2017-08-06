@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+env = os.environ.get
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,10 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '8qz(ppt(-slr)v&=w6vl^vv_iiw$1w=64u-#x!vb1%$q&_z1k5'
+SECRET_KEY = env('SECRET_KEY', '8qz(ppt(-slr)v&=w6vl^vv_iiw$1w=64u-#x!vb1%$q&_z1k5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -78,22 +80,26 @@ WSGI_APPLICATION = 'starter.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    # }
+DB_ENGINE = env('DB_ENGINE', 'postgres')
 
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'starter',
-        'USER': 'starter',
-        'PASSWORD': 'starter',
-        'HOST': 'postgres',
-        'PORT': '5432',
+if DB_ENGINE == 'postgres':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('POSTGRES_DB', 'starter'),
+            'USER': env('POSTGRES_USER', 'starter'),
+            'PASSWORD': env('POSTGRES_PASSWORD', 'starter'),
+            'HOST': env('POSTGRES_HOST', 'starter'),
+            'PORT': '5432',
+        }
     }
-}
-
+elif DB_ENGINE == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -140,7 +146,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Celery
 
-CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_BROKER_URL = env('REDIS_URL', 'redis://redis:6379/0')
 # CELERY_BROKER_URL = 'redis://192.168.10.10:6379/0'
 
 CELERY_RESULT_BACKEND = 'django-db'

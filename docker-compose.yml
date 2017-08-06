@@ -3,10 +3,7 @@ version: '3'
 services:
   postgres:
     image: postgres:9.6-alpine
-    environment:
-      - POSTGRES_DB=starter
-      - POSTGRES_USER=starter
-      - POSTGRES_PASSWORD=starter
+    env_file: .env
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
 
@@ -17,44 +14,53 @@ services:
 
   migration:
     build: .
+    env_file: .env
     depends_on:
       - postgres
       - redis
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
     command: ['python3', 'manage.py', 'migrate']
-    links:
-      - postgres:postgres
-      - redis:redis
 
   worker:
     build: .
+    env_file: .env
     depends_on:
       - postgres
       - redis
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
     command: ['celery', '-A', 'starter', 'worker', '-l', 'info'] # celery -A starter worker -l info
-    links:
-      - postgres:postgres
-      - redis:redis
 
   beat:
     build: .
+    env_file: .env
     depends_on:
       - postgres
       - redis
       - web
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
     command: ['celery', '-A', 'starter', 'beat', '-l', 'info', '-S', 'django'] # celery -A proj beat -l info -S django
-    links:
-      - postgres:postgres
-      - redis:redis
 
   web:
     build: .
+    env_file: .env
     depends_on:
       - postgres
       - redis
       - migration
+      - worker
+      - beat
     command: ['gunicorn', 'starter.wsgi', '--bind', '0.0.0.0:80']
     ports:
       - 80:80
-    links:
-      - postgres:postgres
-      - redis:redis
