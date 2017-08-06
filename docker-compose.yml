@@ -2,16 +2,16 @@ version: '3'
 
 services:
   postgres:
-    image: postgres:9.6
+    image: postgres:9.6-alpine
     environment:
       - POSTGRES_DB=starter
       - POSTGRES_USER=starter
       - POSTGRES_PASSWORD=starter
-    # volumes:
-    #   - ./data/postgres:/var/lib/postgresql/data
-  
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
   redis:
-    image: redis:latest
+    image: redis:alpine
     # volumes:
     #   - ./data/redis:/data
 
