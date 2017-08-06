@@ -25,7 +25,7 @@ SECRET_KEY = '8qz(ppt(-slr)v&=w6vl^vv_iiw$1w=64u-#x!vb1%$q&_z1k5'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic', # whitenoise
     'django.contrib.staticfiles',
+    'django_celery_results',
+    'django_celery_beat',
     'starter'
 ]
 
@@ -77,9 +79,18 @@ WSGI_APPLICATION = 'starter.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # }
+
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'starter',
+        'USER': 'starter',
+        'PASSWORD': 'starter',
+        'HOST': 'postgres',
+        'PORT': '5432',
     }
 }
 
@@ -125,3 +136,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+# Celery
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+# CELERY_BROKER_URL = 'redis://192.168.10.10:6379/0'
+
+CELERY_RESULT_BACKEND = 'django-db'
